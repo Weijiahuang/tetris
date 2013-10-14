@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+ <html>
+ <head>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no" />
+  <link rel = 'stylesheet' href = 'style.css' />
+  	<title>Tetris main page</title>
+ </head>
+ <body>
+<div id ="gameboard">
+<canvas width = '200' height = '400'> </canvas>
+ </div>
+ <div id = "action"> action:
+ </div>
+<script>
+	var snd = new Audio("beep-1.wav");
+ 	var pit = document.getElementsByTagName('canvas')[0];
+ 	var ctx = pit.getContext("2d");
+ 	var board = new Array();
+ 	var current;
+ 	var width = 200, height = 400; 
+ 	var rows = 20;
+ 	var columns = 10;
+ 	var block_w = 20, block_h = 20;
+ 	var current_x ,current_y;
+	var shapes = [
+		[0,0,0,0,
+		1,1,1,1,
+		0,0,0,0,
+		0,0,0,0],
+		[0,0,0,0,
+		 1,1,1,0,
+		 1,0,0,0,
+		 0,0,0,0],
+		[0,0,0,0,
+		 1,1,1,0,
+		 0,0,1,0,
+		 0,0,0,0],
+		[0,0,0,0,
+		 0,1,1,0,
+		 0,1,1,0,
+		 0,0,0,0],
+		[0,0,0,0,
+		 1,1,0,0,
+		 0,1,1,0,
+		 0,0,0,0],
+		[0,0,0,0,
+		 0,1,1,0,
+		 1,1,0,0,
+		 0,0,0,0],
+		[0,0,0,0,
+		 0,1,0,0,
+		 1,1,1,0,
+		 0,0,0,0]
+	      ];
+        pit.addEventListener("touchstart",handleStart,false);
+        pit.addEventListener("touchend",handleEnd,false);
+        pit.addEventListener("touchcancel",handleCancel,false);
+
+var startingX;
+var startingY;  
+    
+function handleStart(event) 
+{
+    event.preventDefault();
+    startingX = event.touches[0].clientX;
+    startingY = event.touches[0].clientY;
+    snd.play();
+}
+
+var endingX;
+var endingY;
+      
+function handleEnd(event) 
+{
+    event.preventDefault();
+    endingX = event.changedTouches[0].clientX;
+    endingY = event.changedTouches[0].clientY;
+    dif_x = endingX -startingX;
+    dif_y = endingY- startingY; 
+    if(Math.abs(dif_x)< 5 && Math.abs(dif_y) < 5)
+    {
+	current = clockwise();
+    }
+    else
+    {
+    	if(Math.abs(dif_x) > Math.abs(dif_y))
+    	{
+    		if ( dif_x > 30)
+    		{
+    			if(validation(1,0))
+    			{
+    				++current_x;
+    				action.innerHTML = "Your finger move right";
+    			}
+    		}
+    		if ( dif_x < -30)
+    		{
+    			if(validation(-1,0))
+    			{
+				--current_x;
+				action.innerHTML = "Your finger move left";
+			}
+    		}
+    	}
+    	else
+    	{
+        	if (dif_y > 30)
+        	{
+        		if(validation(0,1))
+        		{
+	      		  ++current_y;
+	      		  action.innerHTML = "Your finger move down";
+	      		}
+         	}
+         	else
+         	{
+	 	     current = rotate();
+	 	     action.innerHTML = "Your finger move up";
+         	}	
+
+    	}
+    }
+}
+
+//counterclockwise ortation
+function rotate() 
+{
+    var newcurrent = new Array();
+    for (var i = 0; i < 4; ++i)
+    {
+    	newcurrent[i] = new Array(); 
+	for (var j = 0; j< 4; ++j)
+        {
+            newcurrent[i][j] = current [j] [3-i];
+        }
+     }
+     var rotate = newcurrent;
+     return rotate;
+}
+
+// clockwise rotation
+function clockwise() 
+{
+    var newcurrent = new Array();
+    for (var i = 0; i < 4; ++i)
+    {
+    	newcurrent[i] = new Array(); 
+	for (var j = 0; j< 4; ++j)
+        {
+            newcurrent[i][j] = current [3-j] [i];
+        }
+     }
+     var rotate = newcurrent;
+     return rotate;
+}
+
+
+
+
+function handleCancel(event) 
+{
+    event.preventDefault();
+    updateStats(event);
+}
+
+// detect the orientation event
+window.addEventListener("orientationchange", function() {
+		if (window.orientation == 90 || window.orientation == -90)
+		{
+		  alert ('you should not rotate during the game');
+		}
+		if(window.orientation == 0)
+		{
+		  alert ('you should not rotate during the game');
+		}
+		});
+
+// careating pit canvas
+function background()
+{
+	ctx.fillStyle = 'red';
+	ctx.strokeStyle = 'blue';
+	for (var i =0; i < columns ; ++i)
+  	{
+		for (var j = 0; j < rows; ++j)
+		{
+			if (board [j][i] != 0)
+	    		{
+	    			if (j<2)
+	    			{
+					alert ('game over');
+	    			}
+	    			else
+	    			{
+					ctx.fillStyle = 'red';
+					ctx.fillRect ( 20 * i, 20 * j, 19, 19 );
+				} 
+		        }
+		        else
+		        {	
+		        	ctx.fillStyle = 'green';
+		      		ctx.fillRect ( 20 * i, 20 * j, 19, 19 );
+		       		ctx.strokeRect ( 20 * i, 20 * j, 19, 19 );    
+			}
+		}
+  	}
+}
+
+// initiate the board
+function init()
+{
+    for (var i =0; i < rows; ++i)
+    {
+        board[i] = new Array();
+    	for (var j = 0; j < columns; ++j)
+     	{
+       	    board[i][j] = 0;     
+      	}
+    }
+} 
+
+var current = new Array();
+// create a new shape out of 7 possibilities
+function newshape()
+{
+	
+	var shape = shapes[ Math.floor(Math.random()* 7)];
+	for (var i = 0; i < 4; ++i)
+	{
+		current[i] = new Array();
+		for (var j = 0; j< 4; ++j)
+		{
+			var k = 4 * i + j;
+			if (shape [k] != 0)
+			{
+				current[i][j] = shape[k];
+			}
+			else
+			{
+				current[i][j]=0;
+			}
+		}
+	}
+	current_x =3;
+	current_y =0;
+}
+
+function shaperender ()
+{
+    ctx.fillStyle = 'yellow';
+    ctx.strokeStyle = 'green';
+	for (var i =0; i < 4 ; ++i)
+  	{
+		for (var j = 0; j < 4; ++j)
+		{
+		        if (current[i][j]!=0)
+		    	{
+		        	ctx.fillRect ( 20 * (j + current_x), 20 * (i + current_y), 19, 19 );
+		        	ctx.strokeRect ( 20 * (j + current_x), 20 * (i + current_y), 19, 19 );
+		    	}   	   
+		}
+  	}
+}
+
+// moving new shape down until it touches the bottom or other shapes
+function movedown ()
+{
+    if (validation (0,1))
+    {
+        ++current_y;
+    } 
+    else
+    {
+        freeze();
+        newshape();
+    }
+}
+	
+
+// freeze the shape when it touch anything
+function freeze()
+{ 
+    for( var i = 0; i <4; ++i) 
+    {
+    	for (var j=0; j< 4; ++j)
+        {
+            if (current[i][j])
+       	    {
+       	        board[i + current_y ] [j + current_x] = current[i][j];
+	    } 
+        }
+    }
+}
+
+function validation(x,y)
+{
+	x_value = x || 0;
+	y_value = y || 0;
+	x_value = current_x + x_value;
+	y_value = current_y + y_value;
+	for (var i = 0; i< 4; ++i )
+	{
+    	    for( var j = 0; j < 4; ++j)
+    	    {
+        		if(current[i][j])
+        		{
+			    if (typeof board[i+ y_value] == 'undefined'
+				|| typeof board[i + + y_value] [j + x_value] == 'undefined'
+			    ||board[i + y_value][j + x_value] != 0 
+			    || j + x_value < 0 || i + y_value >= rows || x_value + j >= columns ) 
+	    	            {
+	    			return false;
+	       	    	    }
+        	        }
+    		}
+    	}
+	return true;
+}
+
+var counter;
+
+function clear() 
+{
+for ( var i = rows -1; i >= 0; --i)
+{  
+	var row = true;
+	for (var j = 0; j< columns; ++j)
+	{
+		if(board [i][j] == 0)
+		{
+			row =false;
+			break;
+		}
+	}
+	if (row) 
+	{
+		for (var k = i; k > 0; --k)
+		{
+			for (var j = 0; j< columns; ++j)
+			{
+				board[k][j] = board[k -1][j];
+			}	
+		}
+		++i;
+	}	
+}
+}
+
+init();
+newshape();
+setInterval (background,30);
+setInterval (shaperender,30);
+setInterval(movedown,400);
+setInterval(clear,30); 
+ </script>
+ </body>
+ </html>

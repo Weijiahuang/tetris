@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+ <head>
+  <title>Tetris main page</title>
+  <style>
+   div {width:1000px;height:300px;background-color:blue;font-size:150px;padding-left:50px; padding-top:50px;padding:right:50px;}
+   div.location{ margin:30px;}
+  </style>
+ </head>
+ <body>
+  <div id="NewGame"><b>New game</b> </div>
+  </br>
+  <div id="HighScores" ><b>High Scores</b></div>
+  </br>
+  <div id = "quit" > <b> Quit </b></div>
+  <script>
+   NewGame.addEventListener("touchstart",NewGamehandler,false);
+   HighScores.addEventListener("touchstart",HighScoreshandler,false);
+   quit.addEventListener("touchstart",quithandler,false);
+   
+   document.getElementById("HighScores").style.backgroundColor="yellow";
+   
+   function NewGamehandler(event) 
+   {
+      window.location.href= 'games.html';
+   }
+   function HighScoreshandler(event)
+   {
+   	window.location.href= 'statistics.html';
+   }
+   function quithandler (event)
+   {
+	window.location.href= 'quit.html';
+   }
+  </script>
+ </body>
+</html>
+</body>
+</html>
